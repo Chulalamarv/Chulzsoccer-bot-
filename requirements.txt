@@ -2,3 +2,4 @@ python-telegram-bot==20.7
 selenium
 webdriver-manager
 beautifulsoup4
+python-dotenv
