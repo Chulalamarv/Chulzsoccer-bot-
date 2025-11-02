@@ -447,9 +447,10 @@ def main():
 if __name__ == '__main__':
     main()
 
-# === FAKE WEB SERVER FOR RENDER (FREE TIER) ===
+# === FAKE WEB SERVER FOR RENDER ===
 from flask import Flask
 import threading
+import os
 
 app = Flask(__name__)
 
@@ -458,13 +459,23 @@ def home():
     return "Chulzsoccer-bot is running 24/7! Signals active."
 
 def run_flask():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, use_reloader=False)
 
-# Start Flask in background
 flask_thread = threading.Thread(target=run_flask, daemon=True)
 flask_thread.start()
 
+# === MAIN ===
+def main():
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button))
+    application.add_handler(CommandHandler("predict", predict))
+    application.add_handler(CommandHandler("leagues", leagues))
+    application.add_handler(CommandHandler("date", date_command))
+
+    print("YOUR 3-IN-1 BOT IS LIVE!")
+    application.run_polling()
+
 if __name__ == '__main__':
     main()
-
-
