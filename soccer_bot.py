@@ -1,6 +1,7 @@
 import logging
 import re
 import time
+import os  # ← KEEP THIS
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -14,11 +15,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
-import os
-from dotenv import load_dotenv
-
-load_dotenv()  # Load .env file (for local testing only)
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')  # ← NOW SECURE!
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')  # ← KEEP THIS
 
 logging.basicConfig(level=logging.INFO)
 
@@ -449,3 +446,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
