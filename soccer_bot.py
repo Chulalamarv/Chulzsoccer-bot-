@@ -42,17 +42,42 @@ async def date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     date_word = context.args[0].lower()
     if date_word == "today": target = datetime.today()
     elif date_word == "tomorrow": target = datetime.today() + timedelta(days=1)
-   async def date(update: Update, context: ContextTypes.DEFAULT_TYPE):
+  async def date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text("Use: /date today England")
+        await update.message.reply_text("Usage: /date today England")
         return
-
     date_word = context.args[0].lower()
     country = " ".join(context.args[1:]).title()
-
     if date_word not in ["today", "tomorrow"]:
         await update.message.reply_text("Use today or tomorrow")
         return
+    await update.message.reply_text(f"Scanning {date_word} {country}...")
+    driver = get_driver()
+    try:
+        driver.get("https://www.soccer24.com/")
+        time.sleep(5)
+        if date_word == "tomorrow":
+            driver.find_element(By.CSS_SELECTOR, ".calendar__nav").click()
+            time.sleep(2)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        matches = []
+        for row in soup.select(".event__match"):
+            league_div = row.find_previous("div", class_=re.compile("event__title"))
+            league = league_div.get_text(strip=True) if league_div else ""
+            if country.lower() in league.lower():
+                home = row.select_one(".event__participant--home").get_text(strip=True)
+                away = row.select_one(".event__participant--away").get_text(strip=True)
+                time_str = row.select_one(".event__time").get_text(strip=True)
+                matches.append(f"{home} vs {away}\n{league}\n{time_str} UK")
+        if matches:
+            reply = f"{date_word.title()} {country} games:\n\n" + "\n\n".join(matches[:10])
+        else:
+            reply = f"No {country} games {date_word}. Try /date tomorrow England for late games."
+        await update.message.reply_text(reply)
+    except Exception as e:
+        await update.message.reply_text(f"Error: {str(e)[:100]}")
+    finally:
+        driver.quit()
 
     await update.message.reply_text(f"Scanning {date_word} {country}...")
 
@@ -107,4 +132,5 @@ threading.Thread(target=lambda: flask_app.run(host="0.0.0.0", port=int(os.getenv
 
 if __name__ == "__main__":
     main()
+
 
